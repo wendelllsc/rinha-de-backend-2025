@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 @RestController
 @RequestMapping("/payments-summary")
@@ -22,8 +22,8 @@ public class SummaryController {
     }
 
     @GetMapping
-    public Summary summary(@RequestParam("from") OffsetDateTime from,
-                           @RequestParam("to") OffsetDateTime to){
+    public Summary summary(@RequestParam("from") Instant from,
+                           @RequestParam("to") Instant to){
         return summaryComponent.createSummary(from, to);
     }
 }

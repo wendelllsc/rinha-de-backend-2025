@@ -58,6 +58,7 @@ public class ProcessorService {
         try {
             json = objectMapper.writeValueAsString(payment);
         } catch (JsonProcessingException e) {
+            log.error("JSON converter error: {}", e.getMessage());
             throw new RuntimeException(e);
         }
 

@@ -14,8 +14,8 @@ x-app-template:
     deploy:
       resources:
         limits:
-          cpus: "0.60"
-          memory: "125MB"
+          cpus: "0.6"
+          memory: "120MB"
 
   app-env: &app-env
     SERVER_PORT: "8080"
@@ -25,7 +25,7 @@ x-app-template:
     DB_URL: "jdbc:postgresql://postgres:5432/rinha"
     DB_USER: "rinha"
     DB_PASS: "rinha"
-    WORKER_POOL_SIZE: 100
+    WORKER_POOL_SIZE: 25
     CLIENT_MAX_CONNECTIONS: 200
 
 services:
@@ -48,8 +48,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.15"
-          memory: "60MB"
+          cpus: "0.1"
+          memory: "90MB"
     networks:
       - backend
 
@@ -70,8 +70,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.15"
-          memory: "40MB"
+          cpus: "0.2"
+          memory: "20MB"
 
   api1:
     <<: *api

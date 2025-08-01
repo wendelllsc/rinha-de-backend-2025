@@ -1,0 +1,8 @@
+[
+  {
+    "name": "br.com.wlsc.api.domain.payment.Payment",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true
+  }
+]

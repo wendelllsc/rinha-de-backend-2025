@@ -1,36 +1,38 @@
 package br.com.wlsc.api.domain.payment;
 
-import br.com.wlsc.api.client.processor.ProcessorService;
-import br.com.wlsc.api.client.processor.ProcessorType;
+import br.com.wlsc.api.domain.dto.PaymentDto;
+import br.com.wlsc.api.worker.PaymentWorker;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+
+
 @Component
+@Slf4j
 public class PaymentComponent {
 
-    private final ProcessorService processorService;
+    private final PaymentWorker paymentWorker;
     private final PaymentService paymentService;
 
     @Autowired
-    public PaymentComponent(ProcessorService processorService,
+    public PaymentComponent(PaymentWorker paymentWorker,
                             PaymentService paymentService) {
-        this.processorService = processorService;
+        this.paymentWorker = paymentWorker;
         this.paymentService = paymentService;
     }
 
-    public boolean processPayment(Payment payment) {
-        if (processorService.sendToDefaultWithRetry(payment)) {
-            payment.setProcessor(ProcessorType.DEFAULT);
-            paymentService.save(payment);
-            return true;
-        }
+    public void processPayment(PaymentDto paymentDto) {
+        Payment payment = Payment.builder()
+                .correlationId(paymentDto.correlationId())
+                .amount(paymentDto.amount())
+                .requestedAt(Instant.now())
+                .build();
+        paymentWorker.enqueue(payment);
+    }
 
-        if (processorService.sendToFallback(payment)) {
-            payment.setProcessor(ProcessorType.FALLBACK);
-            paymentService.save(payment);
-            return true;
-        }
-
-        return false;
+    public void purgePayments() {
+        paymentService.purgePayments();
     }
 }
