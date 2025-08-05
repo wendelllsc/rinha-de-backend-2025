@@ -3,15 +3,16 @@ server:
 
 app:
   worker:
-    pool-size: ${WORKER_POOL_SIZE:25}
+    pool-size: ${WORKER_POOL_SIZE:30}
+    queue-size: ${QUEUE_SIZE:12000}
   client:
     web:
-      connection-timeout: 5000
+      connection-timeout: ${CLIENT_TIMEOUT:350}
       max-connections: ${CLIENT_MAX_CONNECTIONS:200}
     processor:
       defalt-payment: ${URL_PROCESSOR_DEFAULT_PAYMENT:http://localhost:8001/payments}
       fallback-payment: ${URL_PROCESSOR_FALLBACK_PAYMENT:http://localhost:8002/payments}
-      max-retries: 5
+      max-retries: ${PROCESSOR_MAX_RETRIES:10}
 
 spring:
   application:

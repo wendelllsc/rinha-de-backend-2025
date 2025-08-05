@@ -93,7 +93,7 @@
 				<configuration>
 					<mainClass>br.com.wlsc.api.Server</mainClass>
 					<image>
-						<name>wlsc/api-rinha-backend-2025:latest</name>
+						<name>wendelllsc/rinha_backend_2025_01:latest</name>
 						<builder>paketobuildpacks/builder-jammy-java-tiny:latest</builder>
 						<env>
 							<BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>

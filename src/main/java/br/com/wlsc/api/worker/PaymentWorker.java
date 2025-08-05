@@ -2,6 +2,7 @@ package br.com.wlsc.api.worker;
 
 import br.com.wlsc.api.client.processor.ProcessorService;
 import br.com.wlsc.api.client.processor.ProcessorType;
+import br.com.wlsc.api.domain.dto.PaymentDto;
 import br.com.wlsc.api.domain.payment.Payment;
 import br.com.wlsc.api.domain.payment.PaymentService;
 import lombok.extern.slf4j.Slf4j;
@@ -11,23 +12,24 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.concurrent.LinkedBlockingDeque;
 
 @Component
 @Slf4j
 public class PaymentWorker {
 
-    @Value("${app.worker.pool-size:100}")
+    @Value("${app.worker.pool-size}")
     private Integer workerPoolSize;
 
     private final PaymentService paymentService;
     private final ProcessorService processorService;
-    private final LinkedBlockingDeque<Payment> queue;
+    private final LinkedBlockingDeque<PaymentDto> queue;
 
     @Autowired
     public PaymentWorker(PaymentService paymentService,
                          ProcessorService processorService,
-                         LinkedBlockingDeque<Payment> queue) {
+                         LinkedBlockingDeque<PaymentDto> queue) {
         this.paymentService = paymentService;
         this.processorService = processorService;
         this.queue = queue;
@@ -41,19 +43,20 @@ public class PaymentWorker {
         }
     }
 
-    public void enqueue(Payment payment) {
-        queue.offer(payment);
-    }
-
     private void runWorker() {
         while (true) {
-            Payment payment = takePayment();
+            PaymentDto payment = takePayment();
             processPayment(payment);
         }
     }
 
-    private void processPayment(Payment payment) {
-        log.info("Free memory: {}MB", Runtime.getRuntime().freeMemory() / 1024 / 1024);
+    private void processPayment(PaymentDto paymentDto) {
+        Payment payment = Payment.builder()
+                .correlationId(paymentDto.correlationId())
+                .amount(paymentDto.amount())
+                .requestedAt(Instant.now())
+                .build();
+
         if (processorService.sendToDefaultWithRetry(payment)) {
             payment.setProcessor(ProcessorType.DEFAULT.name());
             sendPaymentDatabase(payment);
@@ -66,7 +69,7 @@ public class PaymentWorker {
             return;
         }
 
-        enqueue(payment);
+        queue.offer(paymentDto);
     }
 
     private void sendPaymentDatabase(Payment payment){
@@ -74,7 +77,7 @@ public class PaymentWorker {
         log.info("Payment saved in the database");
     }
 
-    private Payment takePayment() {
+    private PaymentDto takePayment() {
         try {
             return queue.take();
         } catch (InterruptedException e) {

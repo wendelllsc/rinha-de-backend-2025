@@ -19,7 +19,6 @@ public class ProcessorService {
 
     @Value("${app.client.processor.max-retries}")
     private int maxRetries;
-
     @Value("${app.client.processor.defalt-payment}")
     private String defaultProcessorUrl;
     @Value("${app.client.processor.fallback-payment}")

@@ -1,34 +1,35 @@
 package br.com.wlsc.api.controller;
 
 import br.com.wlsc.api.domain.dto.PaymentDto;
-import br.com.wlsc.api.domain.payment.PaymentComponent;
+import br.com.wlsc.api.domain.payment.PaymentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingDeque;
 
 @RestController
 @RequestMapping("/payments")
 @Slf4j
 public class PaymentController {
 
-    private final ExecutorService executorService;
-    private final PaymentComponent paymentComponent;
+    private final LinkedBlockingDeque<PaymentDto> queue;
+    private final PaymentService paymentService;
 
     @Autowired
-    public PaymentController(ExecutorService executorService, PaymentComponent paymentComponent) {
-        this.executorService = executorService;
-        this.paymentComponent = paymentComponent;
+    public PaymentController(LinkedBlockingDeque<PaymentDto> queue,
+                             PaymentService paymentService) {
+        this.queue = queue;
+        this.paymentService = paymentService;
     }
 
     @PostMapping
     public void createPayment(@RequestBody PaymentDto payment) {
-        executorService.submit(() -> paymentComponent.processPayment(payment));
+        queue.offer(payment);
     }
 
     @PostMapping("/purge")
-    public void purgePayments(){
-        paymentComponent.purgePayments();
+    public void purgePayments() {
+        paymentService.purgePayments();
     }
 }
