@@ -22,8 +22,8 @@ public class SummaryController {
     }
 
     @GetMapping
-    public Summary summary(@RequestParam("from") Instant from,
-                           @RequestParam("to") Instant to){
+    public Summary summary(@RequestParam(value = "from", required = false) Instant from,
+                           @RequestParam(value = "to", required = false) Instant to){
         return summaryComponent.createSummary(from, to);
     }
 }

@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.time.Instant;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -37,11 +38,13 @@ public class PaymentService {
 
     public SummaryDetail getSummaryDefault(Instant from, Instant to) {
         String sql = "SELECT COUNT(*) as totalRequest, COALESCE(SUM(amount), 0) as totalAmount FROM PAYMENTS WHERE processor = 'DEFAULT' AND requested_at >= ? AND requested_at <= ?";
+
         try (Connection connection = dataSource.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-            stmt.setTimestamp(1, Timestamp.from(from));
-            stmt.setTimestamp(2, Timestamp.from(to));
+            stmt.setTimestamp(1, Timestamp.from(Objects.isNull(from) ? Instant.now().minusSeconds(180L) : from));
+            stmt.setTimestamp(2, Timestamp.from(Objects.isNull(to) ? Instant.now() : to));
+
             ResultSet resultSet = stmt.executeQuery();
 
             if (resultSet.next()) {
@@ -60,8 +63,8 @@ public class PaymentService {
         try (Connection connection = dataSource.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-            stmt.setTimestamp(1, Timestamp.from(from));
-            stmt.setTimestamp(2, Timestamp.from(to));
+            stmt.setTimestamp(1, Timestamp.from(Objects.isNull(from) ? Instant.now().minusSeconds(180L) : from));
+            stmt.setTimestamp(2, Timestamp.from(Objects.isNull(to) ? Instant.now() : to));
             ResultSet resultSet = stmt.executeQuery();
 
             if (resultSet.next()) {

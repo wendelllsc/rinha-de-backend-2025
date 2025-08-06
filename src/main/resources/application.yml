@@ -1,5 +1,11 @@
 server:
   port: ${SERVER_PORT:9999}
+  undertow:
+    threads:
+      io: 2
+      worker: 12
+    buffer-size: 1024
+    direct-buffers: true
 
 app:
   worker:
